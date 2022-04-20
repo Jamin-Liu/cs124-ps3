@@ -1,17 +1,15 @@
-from operator import ilshift
 import sys
 import random
 import math
-import sys
-import numpy as np
-from torch import R
 
-A = [10, 8, 7, 6, 5]
-
+##########################
+# READING THE INPUT FILE #
+##########################
 def build_array(filename):
     f = open(filename, "r")
     A = [int(f.readline().strip('\n')) for i in range(100)]
     return A
+    
 
 #############################
 # HEAP CLASS AND OPERATIONS #
@@ -34,7 +32,7 @@ class max_heap:
         for i in range(n):
             self.heap[i+1] = A[i]
         
-        for i in range(self.size()/2, 0, -1):
+        for i in range(int(self.size()/2), 0, -1):
             self.max_heapify(i)
 
         return self.heap
@@ -82,6 +80,7 @@ class max_heap:
             self.swap(largest, pos)
             self.max_heapify(largest)
     
+    # Access the first element of the heap
     def peek(self):
         return self.heap[1]
     
@@ -108,7 +107,7 @@ def generate_random_solution(A):
 
 # Function for generating a random neighbor
 def generate_random_neighbor(S):
-    S_p = S
+    S_p = S.copy()
     n = len(S)
     denominator = n + (n * (n - 1)) / 2
     i = random.randint(0, n - 1)
@@ -137,21 +136,6 @@ def calculate_residue(A, S):
     return abs(residue)
 
 
-# Prepartioning method
-def prepartition(A):
-    n = len(A)
-    
-    P = []
-    for i in range(n):
-        P.append(random.randint(1, n))
-    
-    A_prime = [0] * n 
-    for i in range(n):
-        A_prime[P[i]-1] = A_prime[P[i]-1] + A[i]
-
-    return A_prime
-
-
 # Repeated random function
 def repeated_random(A, iter):
     S = generate_random_solution(A)
@@ -159,74 +143,145 @@ def repeated_random(A, iter):
         S_p = generate_random_solution(A)
         if calculate_residue(A, S_p) < calculate_residue(A, S):
             S = S_p 
-    return S
+    return calculate_residue(A, S)
 
 
 # Hill climbing function
 def hill_climbing(A, iter):
     S = generate_random_solution(A)
+    min_res = calculate_residue(A, S)
     for _ in range(iter):
         S_p = generate_random_neighbor(S)
-        if calculate_residue(A, S_p) < calculate_residue(A, S):
-            S = S_p 
-    return S
+        res_S_p = calculate_residue(A, S_p)
+        if res_S_p < min_res:
+            min_res = res_S_p
+    return min_res
 
 
 # Simulated annealing function
 def simulated_annealing(A, iter):
     S = generate_random_solution(A)
-    S_pp = S
+    S_copy = S
     for i in range(iter):
-        S_p = generate_random_neighbor(A, S)
+        S_p = generate_random_neighbor(S)
         res_S = calculate_residue(A, S)
-        res_S_p = calculate_residue(S_p)
-        prob = math.exp(-(res_S_p - res_S)/ (pow(10,  10) * pow(0.8, i/300)))
-        if res_S_p < res_S or random.rand() < prob:
+        res_S_p = calculate_residue(A, S_p)
+        prob = math.exp(-(res_S_p - res_S) / ((10 * 10) * (0.8 ** math.floor(i/300))))
+        if res_S_p < res_S or random.random() < prob:
             S = S_p
-        if calculate_residue(A, S) < calculate_residue(A, S_pp):
-            S_pp = S
-        
-    return S_pp
+        if calculate_residue(A, S) < calculate_residue(A, S_copy):
+            S_copy = S
+            
+    return calculate_residue(A, S_copy)
+
+
+# Generate random partition
+def generate_random_partition(A):
+    n = len(A)
+    P = []
+    for _ in range(n):
+        P.append(random.randint(1, n))
+    return P
+
+# Generate random neighbor to partition P
+def generate_random_neighbor_partition(P):
+    P_p = P.copy()
+    n = len(P)
+    i = random.randint(1, n)
+    j = P[i - 1]
+    while j == P[i - 1]:
+        j = random.randint(1, n)
+    P_p[i - 1] = j
+    return P_p
+
+
+# Prepartioning method
+def prepartition(A, P):
+    n = len(A)
+    A_p = [0] * n 
+    for i in range(n):
+        A_p[P[i]-1] = A_p[P[i]-1] + A[i]
+    return A_p
 
 
 # Repeated random function (pre-partition version)
 def prepartition_repeated_random(A, iter):
-    A_prime = prepartition(A)
-    return repeated_random(A_prime, iter)
+    P = generate_random_partition(A)
+    A_p = prepartition(A, P)
+    min_res = karmarkar_karp(A_p)
+    for _ in range(iter):
+        P_p = generate_random_partition(A)
+        A_pp = prepartition(A, P_p)
+        res_A_pp = karmarkar_karp(A_pp) 
+        if res_A_pp < min_res:
+            min_res = res_A_pp
+    return min_res
     
 
 # Hill climbing function (pre-partition version)
 def prepartition_hill_climbing(A, iter):
-    A_prime = prepartition(A)
-    return hill_climbing(A_prime, iter)
+    P = generate_random_partition(A)
+    A_p = prepartition(A, P)
+    min_res = karmarkar_karp(A_p)
+    for _ in range(iter):
+        P_p = generate_random_neighbor_partition(P)
+        A_pp = prepartition(A, P_p)
+        res_A_pp = karmarkar_karp(A_pp) 
+        if res_A_pp < min_res:
+            min_res = res_A_pp
+    return min_res
 
 
 # Simulated annealing function (pre-partition version)
 def prepartition_simulated_annealing(A, iter):
-    A_prime = prepartition(A)
-    return simulated_annealing(A_prime, iter)
+    P = generate_random_solution(A)
+    P_copy = P
+    for i in range(iter):
+        A_p = prepartition(A, P)
+        P_p = generate_random_neighbor_partition(P)
+        A_pp = prepartition(A, P_p)
+        res_A_pp = karmarkar_karp(A_pp)
+        res_A_p = karmarkar_karp(A_p)
+        prob = math.exp(-(res_A_pp - res_A_p) / ((10 * 10) * (0.8 ** math.floor(i/300))))
+        if res_A_pp < res_A_p or random.random() < prob:
+            P = P_p
+        A_pcopy = A_p = prepartition(A, P_copy)
+        if res_A_p < karmarkar_karp(A_pcopy):
+            P_copy = P
+            
+    A_final = prepartition(A, P_copy)
+    return karmarkar_karp(A_final)
 
 
 # Karmarkar-Karp Function
-def karmarkar_karp(H):
-    for i in range(H.size()):
+def karmarkar_karp(A):
+    H = max_heap()
+    H.build_heap(A)
+    for _ in range(H.size()):
         max = H.replace_max(0)
         max_p = H.peek()
         _ = H.replace_max(max - max_p)
     return H.peek()
 
 
-# Flag 0
-if (sys.argv == 1):
+################
+# SYSTEM CALLS #
+################
 
-    A = build_array(sys.argv[3])
+# A = [10, 8, 7, 6, 5]
+# iter = 250000
+# print(simulated_annealing(A, iter))
+
+# Flag 0
+if int(sys.argv[1]) == 0:
+
+    #A = build_array(sys.argv[3])
+    A = [10, 8, 7, 6, 5]
     iter = 25000
 
     # Karmarkar Karp
     if int(sys.argv[2]) == 0:
-        H = max_heap()
-        H.build_heap(A)
-        print(karmarkar_karp(H))
+        print(karmarkar_karp(A))
 
     # Repeated Random
     if int(sys.argv[2]) == 1:
