@@ -2,12 +2,45 @@ from operator import ilshift
 import sys
 import random
 import math
+import sys
 import numpy as np
 from torch import R
 
 A = [10, 8, 7, 6, 5]
 
+#############################
+# HEAP CLASS AND OPERATIONS #
+#############################
+class max_heap:
 
+    def __init__(self, maxsize):
+        self.maxsize = maxsize
+        self.size = 0
+        self.heap = [0] * (self.maxsize + 1)
+        self.heap[0] = sys.maxsize
+        self.front = 1
+    
+    # Parent of node currently at pos
+    def parent(self, pos):
+        return pos // 2
+    
+    # Left child of node currently at pos
+    def left_child(self, pos):
+        return 2 * pos
+    
+    # Right child of node currently at pos
+    def right_child(self, pos):
+        return (2 * pos) + 1
+
+    # Length of array
+    def 
+
+    #
+
+
+######################################
+# NUMBER PARTITION GENERAL FUNCTIONS #
+######################################
 # Function for creating a random solution
 def generate_random_solution(A):
     S = []
@@ -50,13 +83,15 @@ def calculate_residue(A, S):
 
 # Prepartioning method
 def prepartition(A, P):
-    if len(A) != len(P):
-        print("Error: A and P length mismatch")
-        return
+    n = len(A)
     
-    A_prime = [0] * len(A)
-    for i in range(len(A)):
-        A_prime[P[i]] = A_prime[P[i]] + A[i]
+    P = []
+    for i in range(n):
+        P.append(random.randint(1, n))
+    
+    A_prime = [0] * n 
+    for i in range(n):
+        A_prime[P[i]-1] = A_prime[P[i]-1] + A[i]
 
     return A_prime
 
@@ -115,6 +150,51 @@ def prepartition_simulated_annealing(A, P, iter):
     A_prime = prepartition(A, P)
     return simulated_annealing(A_prime, iter)
 
+
+# Karmarkar-Karp Function
+
+def karmarkar_karp(H):
+    for i in range(H.size()):
+        max = H.replace_max(0)
+        max_p = H.peek()
+        _ = H.replace_max(max - max_p)
+    return H.peek()
+# 
+
+def 
+
+def max_heapify(A):
+    
+
+# Build a max heap from an input array
+def build_heap(A):
+    n = len(A)
+    H = [0] * (n + 1)
+    H[0] = sys.maxsize
+
+    for i in range(n):
+        H[i+1] = A[i]
+    
+    for i in range(len(H)/2, 0, -1):
+        max_heapify(i)
+
+    return H
+
+# need to build max heap
+# need to build extract max function
+# def construct_heap():
+#     H = []
+#     for i in range(100):
+#         H.append(random.randint(1, sys.maxsize))
+
+# 
+
+
+
+
+
+
+# System Outputs
 if int(sys.argv[2]) == 0:
     # run KK
     pass
