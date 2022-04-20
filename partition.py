@@ -8,34 +8,90 @@ from torch import R
 
 A = [10, 8, 7, 6, 5]
 
+def build_array(filename):
+    f = open(filename, "r")
+    A = [int(f.readline().strip('\n')) for i in range(100)]
+    return A
+
 #############################
 # HEAP CLASS AND OPERATIONS #
 #############################
 class max_heap:
 
-    def __init__(self, maxsize):
-        self.maxsize = maxsize
-        self.size = 0
-        self.heap = [0] * (self.maxsize + 1)
+    def __init__(self):
+        self.heap = [0] * (101)
         self.heap[0] = sys.maxsize
         self.front = 1
+
+    def size(self):
+        return len(self.heap)
+
+    def build_heap(self, A):
+        n = len(A)
+        self.heap = [0] * (n + 1)
+        self.heap[0] = sys.maxsize
+
+        for i in range(n):
+            self.heap[i+1] = A[i]
+        
+        for i in range(self.size()/2, 0, -1):
+            self.max_heapify(i)
+
+        return self.heap
     
+    # Swap two nodes at i and j
+    def swap(self, i, j):
+        self.heap[i], self.heap[j] = (self.heap[j], self.heap[i])
+
     # Parent of node currently at pos
-    def parent(self, pos):
-        return pos // 2
-    
+    def parent(self, child):
+        if child == 1:
+            return -1
+        return child / 2    
+        
     # Left child of node currently at pos
-    def left_child(self, pos):
-        return 2 * pos
-    
+    def left_child(self, parent):
+        if parent > (self.size() / 2):
+            return -1
+        return parent * 2
+
     # Right child of node currently at pos
-    def right_child(self, pos):
-        return (2 * pos) + 1
+    def right_child(self, parent):
+        if parent > (self.size() / 2):
+            return -1
+        return (parent * 2) + 1
 
-    # Length of array
-    def 
-
-    #
+    # Max-Heapify
+    def max_heapify(self, pos):
+        if pos == 0:
+            return
+        
+        l = self.left_child(pos)
+        r = self.right_child(pos)
+        
+        largest = pos
+        size = self.size()
+        
+        if (l > -1) and (l < size) and (self.heap[l] > self.heap[pos]):
+            largest = l
+        
+        if (r > -1) and (r < size) and (self.heap[r] > self.heap[largest]):
+            largest = r
+        
+        if largest != pos:
+            self.swap(largest, pos)
+            self.max_heapify(largest)
+    
+    def peek(self):
+        return self.heap[1]
+    
+    # Replace the maximum 
+    def replace_max(self, rep):
+        max = self.heap[1]
+        self.heap[1] = rep
+        self.max_heapify(1)
+        
+        return max
 
 
 ######################################
@@ -82,7 +138,7 @@ def calculate_residue(A, S):
 
 
 # Prepartioning method
-def prepartition(A, P):
+def prepartition(A):
     n = len(A)
     
     P = []
@@ -134,96 +190,64 @@ def simulated_annealing(A, iter):
 
 
 # Repeated random function (pre-partition version)
-def prepartition_repeated_random(A, P, iter):
-    A_prime = prepartition(A, P)
+def prepartition_repeated_random(A, iter):
+    A_prime = prepartition(A)
     return repeated_random(A_prime, iter)
     
 
 # Hill climbing function (pre-partition version)
-def prepartition_hill_climbing(A, P, iter):
-    A_prime = prepartition(A, P)
+def prepartition_hill_climbing(A, iter):
+    A_prime = prepartition(A)
     return hill_climbing(A_prime, iter)
 
 
 # Simulated annealing function (pre-partition version)
-def prepartition_simulated_annealing(A, P, iter):
-    A_prime = prepartition(A, P)
+def prepartition_simulated_annealing(A, iter):
+    A_prime = prepartition(A)
     return simulated_annealing(A_prime, iter)
 
 
 # Karmarkar-Karp Function
-
 def karmarkar_karp(H):
     for i in range(H.size()):
         max = H.replace_max(0)
         max_p = H.peek()
         _ = H.replace_max(max - max_p)
     return H.peek()
-# 
 
-def 
 
-def max_heapify(A):
+# Flag 0
+if (sys.argv == 1):
+
+    A = build_array(sys.argv[3])
+    iter = 25000
+
+    # Karmarkar Karp
+    if int(sys.argv[2]) == 0:
+        H = max_heap()
+        H.build_heap(A)
+        print(karmarkar_karp(H))
+
+    # Repeated Random
+    if int(sys.argv[2]) == 1:
+        print(repeated_random(A, iter))
+
+    # Hill Climbing
+    if int(sys.argv[2]) == 2:
+        print(hill_climbing(A, iter))
+
+    # Simulated Annealing
+    if int(sys.argv[2]) == 3:
+        print(simulated_annealing(A, iter))
+
+    # Prepartitioned Repeated Random
+    if int(sys.argv[2]) == 11:
+        print(prepartition_repeated_random(A, iter))
+
+    # Prepartitioned Hill Climbing
+    if int(sys.argv[2]) == 12:
+        print(prepartition_hill_climbing(A, iter))
     
-
-# Build a max heap from an input array
-def build_heap(A):
-    n = len(A)
-    H = [0] * (n + 1)
-    H[0] = sys.maxsize
-
-    for i in range(n):
-        H[i+1] = A[i]
-    
-    for i in range(len(H)/2, 0, -1):
-        max_heapify(i)
-
-    return H
-
-# need to build max heap
-# need to build extract max function
-# def construct_heap():
-#     H = []
-#     for i in range(100):
-#         H.append(random.randint(1, sys.maxsize))
-
-# 
-
-
-
-
-
-
-# System Outputs
-if int(sys.argv[2]) == 0:
-    # run KK
-    pass
-
-
-if int(sys.argv[2]) == 1:
-    # repeated random
-    pass
-
-
-if int(sys.argv[2]) == 2:
-    # hill climbing
-    pass
-
-
-if int(sys.argv[2]) == 3:
-    # simulated annealing
-    pass
-
-
-if int(sys.argv[2]) == 11:
-    # prepartitioned repeated random
-    pass
-
-
-if int(sys.argv[2]) == 12:
-    # prepartitioned hill climbing
-    pass
-
-if int(sys.argv[2]) == 13:
-    # prepartitioned simulated annealing
-    pass
+    # Prepartitioned Hill Climbing
+    if int(sys.argv[2]) == 13:
+        print(prepartition_simulated_annealing(A, iter))
