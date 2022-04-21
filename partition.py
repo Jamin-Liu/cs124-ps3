@@ -160,13 +160,14 @@ def hill_climbing(A, iter):
 
 # Simulated annealing function
 def simulated_annealing(A, iter):
+    return
     S = generate_random_solution(A)
     S_copy = S
     for i in range(iter):
         S_p = generate_random_neighbor(S)
         res_S = calculate_residue(A, S)
         res_S_p = calculate_residue(A, S_p)
-        prob = math.exp(-(res_S_p - res_S) / ((10 * 10) * (0.8 ** math.floor(i/300))))
+        prob = math.exp(-(res_S_p - res_S)/ (10 ** 10) * math.floor(0.8 ** (i/300)))
         if res_S_p < res_S or random.random() < prob:
             S = S_p
         if calculate_residue(A, S) < calculate_residue(A, S_copy):
@@ -234,6 +235,7 @@ def prepartition_hill_climbing(A, iter):
 
 # Simulated annealing function (pre-partition version)
 def prepartition_simulated_annealing(A, iter):
+    return
     P = generate_random_solution(A)
     P_copy = P
     for i in range(iter):
@@ -242,7 +244,7 @@ def prepartition_simulated_annealing(A, iter):
         A_pp = prepartition(A, P_p)
         res_A_pp = karmarkar_karp(A_pp)
         res_A_p = karmarkar_karp(A_p)
-        prob = math.exp(-(res_A_pp - res_A_p) / ((10 * 10) * (0.8 ** math.floor(i/300))))
+        prob = math.exp(-(res_A_pp - res_A_p)/ (10 ** 10) * math.floor(0.8 ** (i/300)))
         if res_A_pp < res_A_p or random.random() < prob:
             P = P_p
         A_pcopy = A_p = prepartition(A, P_copy)
@@ -268,15 +270,16 @@ def karmarkar_karp(A):
 # SYSTEM CALLS #
 ################
 
-# A = [10, 8, 7, 6, 5]
+# x = 10 ** 10
+# A = [10 * x, 8 * x, 7 * x, 6 * x, 5 * x]
 # iter = 250000
 # print(simulated_annealing(A, iter))
 
 # Flag 0
 if int(sys.argv[1]) == 0:
 
-    #A = build_array(sys.argv[3])
-    A = [10, 8, 7, 6, 5]
+    A = build_array(sys.argv[3])
+    #A = [10, 8, 7, 6, 5]
     iter = 25000
 
     # Karmarkar Karp
