@@ -4,7 +4,7 @@ import math
 # import heapq
 import bisect
 
-from numpy import extract
+from numpy import extract, test
 
 ##########################
 # READING THE INPUT FILE #
@@ -327,6 +327,28 @@ def karmarkar_karp(A):
 #     return H.peek()
 
 
+##################
+#GRAPHS AND TABLES
+##################
+
+def generate_random_problem():
+    A = []
+    for _ in range(100):
+        A.append(random.randint(0, 10 ** 10))
+    return A
+
+def test_karmarkar_karp(tests):
+    residues = []
+    for A in tests:
+        residues.append(karmarkar_karp(A))
+    print(residues)
+
+def test_algorithm(tests, alg):
+    residues = []
+    for A in tests:
+        residues.append(alg(A, 25000))
+    print(residues)
+
 ################
 # SYSTEM CALLS #
 ################
@@ -335,7 +357,7 @@ def karmarkar_karp(A):
 # iter = 15
 # print(prepartition_simulated_annealing(A, iter))
 
-# Flag 0
+# Flag 0 - Standard Run
 if int(sys.argv[1]) == 0:
 
     A = build_array(sys.argv[3])
@@ -369,3 +391,19 @@ if int(sys.argv[1]) == 0:
     # Prepartitioned Hill Climbing
     if int(sys.argv[2]) == 13:
         print(prepartition_simulated_annealing(A, iter))
+
+
+# Flag 1 -Graphs and Tables
+if int(sys.argv[1]) == 1:
+    tests = []
+    for _ in range(10):
+        tests.append(generate_random_problem())
+
+    test_karmarkar_karp(tests)
+    
+    test_algorithm(tests, repeated_random)
+    test_algorithm(tests, hill_climbing)
+    test_algorithm(tests, simulated_annealing)
+    test_algorithm(tests, prepartition_repeated_random)
+    test_algorithm(tests, prepartition_hill_climbing)
+    test_algorithm(tests, prepartition_simulated_annealing)
