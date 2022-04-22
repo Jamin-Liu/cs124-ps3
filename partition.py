@@ -1,7 +1,10 @@
 import sys
 import random
 import math
-import heapq
+# import heapq
+import bisect
+
+from numpy import extract
 
 ##########################
 # READING THE INPUT FILE #
@@ -16,6 +19,8 @@ def build_array(filename):
 #############################
 # HEAP CLASS AND OPERATIONS #
 #############################
+
+# GOING TO TRY OUT HEAPQ STUFF HERE
 
 class max_heap:
 
@@ -284,16 +289,42 @@ def prepartition_simulated_annealing(A, iter):
     # A_final = prepartition(A, P_copy)
     # return karmarkar_karp(A_final)
 
+def insertion_sort(A):
+    for i in range(1, len(A)):
+        temp = A[i]
+        j = i-1
+        while j >= 0 and temp < A[j]:
+            A[j + 1] = A[j]
+            j -= 1
+        A[j + 1] = temp
+        
+def insert(A, elt):
+    bisect.insort_left(A, elt)
+
+def extract_max(A):
+    return A.pop(-1)
+
+def build_heap(A):
+    insertion_sort(A)
+
+def karmarkar_karp(A):
+    H = A.copy()
+    build_heap(H)
+    while len(H) >= 2:
+        max = extract_max(H)
+        max -= extract_max(H)
+        insert(H, max)
+    return extract_max(H)
 
 # Karmarkar-Karp Function
-def karmarkar_karp(A):
-    H = max_heap()
-    H.build_heap(A)
-    for _ in range(H.size()):
-        max = H.replace_max(0)
-        max_p = H.peek()
-        _ = H.replace_max(max - max_p)
-    return H.peek()
+# def karmarkar_karp(A):
+#     H = max_heap()
+#     H.build_heap(A)
+#     for _ in range(H.size()):
+#         max = H.replace_max(0)
+#         max_p = H.peek()
+#         _ = H.replace_max(max - max_p)
+#     return H.peek()
 
 
 ################
@@ -309,7 +340,7 @@ if int(sys.argv[1]) == 0:
 
     A = build_array(sys.argv[3])
     #A = [10, 8, 7, 6, 5]
-    iter = 10000
+    iter = 25000
 
     # Karmarkar Karp
     if int(sys.argv[2]) == 0:
