@@ -5,6 +5,7 @@ import math
 ##########################
 # READING THE INPUT FILE #
 ##########################
+
 def build_array(filename):
     f = open(filename, "r")
     A = [int(f.readline().strip('\n')) for i in range(100)]
@@ -14,6 +15,7 @@ def build_array(filename):
 #############################
 # HEAP CLASS AND OPERATIONS #
 #############################
+
 class max_heap:
 
     def __init__(self):
@@ -96,6 +98,7 @@ class max_heap:
 ######################################
 # NUMBER PARTITION GENERAL FUNCTIONS #
 ######################################
+
 # Function for creating a random solution
 def generate_random_solution(A):
     S = []
@@ -128,11 +131,9 @@ def calculate_residue(A, S):
     if len(A) != len(S):
         print("Error: A and S length mismatch")
         return
-    
     residue = 0
     for i in range(len(A)):
         residue += (A[i] * S[i])
-    
     return abs(residue)
 
 
@@ -160,20 +161,22 @@ def hill_climbing(A, iter):
 
 # Simulated annealing function
 def simulated_annealing(A, iter):
-    return
     S = generate_random_solution(A)
-    S_copy = S
+    S_pp = S
     for i in range(iter):
         S_p = generate_random_neighbor(S)
         res_S = calculate_residue(A, S)
         res_S_p = calculate_residue(A, S_p)
-        prob = math.exp(-(res_S_p - res_S)/ (10 ** 10) * math.floor(0.8 ** (i/300)))
-        if res_S_p < res_S or random.random() < prob:
+        if res_S_p < res_S:
             S = S_p
-        if calculate_residue(A, S) < calculate_residue(A, S_copy):
-            S_copy = S
+        else:
+            prob = math.exp(-1 * (res_S_p - res_S) / (10 ** 10) * (0.8 ** (i/300)))
+            if random.random() < prob:
+                S = S_p
+        if calculate_residue(A, S) < calculate_residue(A, S_pp):
+            S_pp = S
             
-    return calculate_residue(A, S_copy)
+    return calculate_residue(A, S_pp)
 
 
 # Generate random partition
@@ -183,6 +186,7 @@ def generate_random_partition(A):
     for _ in range(n):
         P.append(random.randint(1, n))
     return P
+
 
 # Generate random neighbor to partition P
 def generate_random_neighbor_partition(P):
@@ -203,6 +207,11 @@ def prepartition(A, P):
     for i in range(n):
         A_p[P[i]-1] = A_p[P[i]-1] + A[i]
     return A_p
+
+
+def prepartition_calculate_residue(A, P):
+    A_p = prepartition(A, P)
+    return karmarkar_karp(A_p)
 
 
 # Repeated random function (pre-partition version)
@@ -235,18 +244,38 @@ def prepartition_hill_climbing(A, iter):
 
 # Simulated annealing function (pre-partition version)
 def prepartition_simulated_annealing(A, iter):
-    return
-    P = generate_random_solution(A)
+    P = generate_random_partition(A)
     P_copy = P
+    for i in range(iter):
+        P_p = generate_random_neighbor_partition(P)
+        res_A_p = prepartition_calculate_residue(A, P)
+        res_A_pp = prepartition_calculate_residue(A, P_p)
+        if res_A_pp < res_A_p :
+            P = P_p
+        else:
+            prob = math.exp(-1 * (res_A_pp - res_A_p) / (10 ** 10) * (0.8 ** (i/300)))
+            if random.random() < prob:
+                P = P_p
+        if prepartition_calculate_residue(A, P) < prepartition_calculate_residue(A, P_copy):
+            P_copy = P
+            
+    return prepartition_calculate_residue(A, P_copy)
+
+
+    P = generate_random_solution(A)
+    P_copy = P.copy()
     for i in range(iter):
         A_p = prepartition(A, P)
         P_p = generate_random_neighbor_partition(P)
         A_pp = prepartition(A, P_p)
         res_A_pp = karmarkar_karp(A_pp)
         res_A_p = karmarkar_karp(A_p)
-        prob = math.exp(-(res_A_pp - res_A_p)/ (10 ** 10) * math.floor(0.8 ** (i/300)))
-        if res_A_pp < res_A_p or random.random() < prob:
+        if res_A_pp < res_A_p :
             P = P_p
+        else:
+            prob = math.exp(-1 * (res_A_pp - res_A_p) / (10 ** 10) * (0.8 ** (i/300)))
+            if random.random() < prob:
+                P = P_p
         A_pcopy = A_p = prepartition(A, P_copy)
         if res_A_p < karmarkar_karp(A_pcopy):
             P_copy = P
@@ -270,10 +299,9 @@ def karmarkar_karp(A):
 # SYSTEM CALLS #
 ################
 
-# x = 10 ** 10
-# A = [10 * x, 8 * x, 7 * x, 6 * x, 5 * x]
-# iter = 250000
-# print(simulated_annealing(A, iter))
+# A = [10, 8, 7, 6, 5]
+# iter = 15
+# print(prepartition_simulated_annealing(A, iter))
 
 # Flag 0
 if int(sys.argv[1]) == 0:
@@ -284,27 +312,33 @@ if int(sys.argv[1]) == 0:
 
     # Karmarkar Karp
     if int(sys.argv[2]) == 0:
-        print(karmarkar_karp(A))
+        pass
+        #print(karmarkar_karp(A))
 
     # Repeated Random
     if int(sys.argv[2]) == 1:
-        print(repeated_random(A, iter))
+        pass
+        #print(repeated_random(A, iter))
 
     # Hill Climbing
     if int(sys.argv[2]) == 2:
-        print(hill_climbing(A, iter))
+        pass
+        #print(hill_climbing(A, iter))
 
     # Simulated Annealing
     if int(sys.argv[2]) == 3:
-        print(simulated_annealing(A, iter))
+        pass
+        #print(simulated_annealing(A, iter))
 
     # Prepartitioned Repeated Random
     if int(sys.argv[2]) == 11:
-        print(prepartition_repeated_random(A, iter))
+        pass
+        #print(prepartition_repeated_random(A, iter))
 
     # Prepartitioned Hill Climbing
     if int(sys.argv[2]) == 12:
-        print(prepartition_hill_climbing(A, iter))
+        pass
+        #print(prepartition_hill_climbing(A, iter))
     
     # Prepartitioned Hill Climbing
     if int(sys.argv[2]) == 13:
