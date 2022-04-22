@@ -15,9 +15,9 @@ def build_array(filename):
     return A
     
 
-#############################
+###################
 # HEAP OPERATIONS #
-#############################
+###################
 
 def insertion_sort(A):
     for i in range(1, len(A)):
@@ -217,9 +217,9 @@ def prepartition_simulated_annealing(A, iter):
     return prepartition_calculate_residue(A, P_copy)
 
 
-##################
-#GRAPHS AND TABLES
-##################
+#####################
+# GRAPHS AND TABLES #
+#####################
 
 def generate_random_problem():
     A = []
