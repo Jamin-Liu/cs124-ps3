@@ -2,6 +2,9 @@ import sys
 import random
 import math
 import bisect
+import statistics
+import time
+import matplotlib.pyplot as plt
 from numpy import extract, test
 
 
@@ -213,7 +216,6 @@ def prepartition_simulated_annealing(A, iter):
                 P = P_p
         if prepartition_calculate_residue(A, P) < prepartition_calculate_residue(A, P_copy):
             P_copy = P
-            
     return prepartition_calculate_residue(A, P_copy)
 
 
@@ -221,39 +223,139 @@ def prepartition_simulated_annealing(A, iter):
 # GRAPHS AND TABLES #
 #####################
 
-def generate_random_problem():
+def generate_random_problem(size):
     A = []
-    for _ in range(100):
-        A.append(random.randint(0, 10 ** 10))
+    for _ in range(size):
+        A.append(random.randint(1, 10 ** 12))
     return A
+
+
+def print_stats(lst):
+    print("Residues: ")
+    print(lst)
+    print("Mean: " + str(sum(lst) / len(lst)))
+    print("Max: " + str(max(lst)))
+    print("Min: " + str(min(lst)))
+    print("Standard Deviation: " + str(statistics.stdev(lst)))
+    print("\n\n")
 
 
 def test_karmarkar_karp(tests):
     residues = []
     for A in tests:
         residues.append(karmarkar_karp(A))
-    print(residues)
-
+    print("karmarkar_karp:")
+    print("\n")
+    print_stats(residues)
+    
 
 def test_algorithm(tests, alg):
     residues = []
     for A in tests:
         residues.append(alg(A, 25000))
-    print(residues)
+    print(alg.__name__ + ":")
+    print("\n")
+    print_stats(residues)
+
+    
+def graph_karmarkar_karp():
+    times = []
+    sizes = []
+
+    for i in range(50, 550, 50):
+
+        time_alg = 0
+
+        for _ in range(50):
+            A = generate_random_problem(i)
+            start = time.time()
+            _ = karmarkar_karp(A)
+            end = time.time()
+            time_alg += (end - start)
+
+        time_alg /= 50
+        time_alg *= 1000
+
+        times.append(time_alg)
+        sizes.append(i)
+
+    plt.plot(sizes, times)
+    plt.title("Karmarkar Karp: Run Time")        
+    plt.ylabel("Average Run Time (milliseconds)")
+    plt.xlabel("Array Size")
+    plt.savefig("times_karmarkar_karp" + ".png")
+    plt.subplots_adjust(left=0.5)
+    plt.show()
+
+
+def graph_alg(alg, name):
+    times = []
+    sizes = []
+
+    for i in range(50, 550, 50):
+
+        time_alg = 0
+
+        for _ in range(20):
+            A = generate_random_problem(i)
+            start = time.time()
+            _ = alg(A, 25000)
+            end = time.time()
+            time_alg += (end - start)
+
+        time_alg /= 20
+        time_alg *= 1000
+
+        times.append(time_alg)
+        sizes.append(i)
+
+    plt.plot(sizes, times)
+    plt.title(name + ": Run Time")
+    plt.ylabel("Average Run Time (milliseconds)")
+    plt.xlabel("Array Size")
+    plt.savefig("time_" + (alg.__name__) + ".png")
+    plt.subplots_adjust(left=0.5)
+    plt.show()
+
+
+def runtime_karmarkar_karp():
+    time_alg = 0
+
+    for _ in range(50):
+        A = generate_random_problem(100)
+        start = time.time()
+        _ = karmarkar_karp(A)
+        end = time.time()
+        time_alg += (end - start)
+
+    time_alg /= 50
+    time_alg *= 1000
+    print("Average Runtime karmark_karp: " + str(time_alg))
+
+
+def runtime_alg(alg):
+    time_alg = 0
+
+    for _ in range(50):
+        A = generate_random_problem(100)
+        start = time.time()
+        _ = alg(A, 25000)
+        end = time.time()
+        time_alg += (end - start)
+
+    time_alg /= 50
+    time_alg *= 1000
+    print("Average Runtime " + alg.__name__ + ": " + str(time_alg))
 
 
 ################
 # SYSTEM CALLS #
 ################
 
-# A = [10, 8, 7, 6, 5]
-# print(prepartition_simulated_annealing(A, iter))
-
 # Flag 0 - Standard Run
 if int(sys.argv[1]) == 0:
 
     A = build_array(sys.argv[3])
-    #A = [10, 8, 7, 6, 5]
     iter = 25000
 
     # Karmarkar Karp
@@ -285,14 +387,13 @@ if int(sys.argv[1]) == 0:
         print(prepartition_simulated_annealing(A, iter))
 
 
-# Flag 1 - Graphs and Tables
+# Flag 1 -Graphs and Tables
 if int(sys.argv[1]) == 1:
     tests = []
-    for _ in range(10):
-        tests.append(generate_random_problem())
+    for _ in range(15):
+        tests.append(generate_random_problem(100))
 
     test_karmarkar_karp(tests)
-    
     test_algorithm(tests, repeated_random)
     test_algorithm(tests, hill_climbing)
     test_algorithm(tests, simulated_annealing)
@@ -300,98 +401,18 @@ if int(sys.argv[1]) == 1:
     test_algorithm(tests, prepartition_hill_climbing)
     test_algorithm(tests, prepartition_simulated_annealing)
 
+    graph_karmarkar_karp()
+    graph_alg(repeated_random, "Repeated Random")
+    graph_alg(hill_climbing, "Hill Climbing")
+    graph_alg(simulated_annealing, "Simulated Annealing")
+    graph_alg(prepartition_repeated_random, "Prepartition Repeated Random")
+    graph_alg(prepartition_hill_climbing, "Prepartition Hill Climbing")
+    graph_alg(prepartition_simulated_annealing, "Prepartition Simulated Annealing")
 
-#######################
-# OLD STUFF TO DELETE #
-#######################
-
-'''
-class max_heap:
-
-    def __init__(self):
-        self.heap = [0] * (101)
-        self.heap[0] = sys.maxsize
-        self.front = 1
-
-    def size(self):
-        return len(self.heap)
-
-    def build_heap(self, A):
-        n = len(A)
-        self.heap = [0] * (n + 1)
-        self.heap[0] = sys.maxsize
-
-        for i in range(n):
-            self.heap[i+1] = A[i]
-        
-        for i in range(int(self.size()/2), 0, -1):
-            self.max_heapify(i)
-
-        return self.heap
-    
-    # Swap two nodes at i and j
-    def swap(self, i, j):
-        self.heap[i], self.heap[j] = (self.heap[j], self.heap[i])
-
-    # Parent of node 
-    def parent(self, child):
-        if child == 1:
-            return -1
-        return child / 2    
-        
-    # Left child of node
-    def left_child(self, parent):
-        if parent > (self.size() / 2):
-            return -1
-        return parent * 2
-
-    # Right child of node
-    def right_child(self, parent):
-        if parent > (self.size() / 2):
-            return -1
-        return (parent * 2) + 1
-
-    # Max-Heapify
-    def max_heapify(self, pos):
-        if pos == 0:
-            return
-        
-        l = self.left_child(pos)
-        r = self.right_child(pos)
-        
-        largest = pos
-        size = self.size()
-        
-        if (l > -1) and (l < size) and (self.heap[l] > self.heap[pos]):
-            largest = l
-        
-        if (r > -1) and (r < size) and (self.heap[r] > self.heap[largest]):
-            largest = r
-        
-        if largest != pos:
-            self.swap(largest, pos)
-            self.max_heapify(largest)
-    
-    # Access the first element of the heap
-    def peek(self):
-        return self.heap[1]
-    
-    # Replace the maximum 
-    def replace_max(self, rep):
-        max = self.heap[1]
-        self.heap[1] = rep
-        self.max_heapify(1)
-        
-        return max
-    
-
-# Karmarkar-Karp Function
-def karmarkar_karp(A):
-    H = max_heap()
-    H.build_heap(A)
-    for _ in range(H.size()):
-        max = H.replace_max(0)
-        max_p = H.peek()
-        _ = H.replace_max(max - max_p)
-    return H.peek()
-'''
+    runtime_karmarkar_karp()
+    runtime_alg(repeated_random)
+    runtime_alg(hill_climbing)
+    runtime_alg(simulated_annealing)
+    runtime_alg(prepartition_repeated_random)
+    runtime_alg(prepartition_hill_climbing)
+    runtime_alg(prepartition_simulated_annealing)
